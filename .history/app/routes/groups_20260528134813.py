@@ -1,7 +1,5 @@
 """Group management routes"""
 from fastapi import APIRouter, HTTPException, status, Depends
-from fastapi import APIRouter, Depends, HTTPException
-
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from typing import List

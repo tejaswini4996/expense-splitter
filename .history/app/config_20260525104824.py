@@ -2,6 +2,7 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
+from app.config import get_settings
 
 class Settings(BaseSettings):
     """Application settings from environment variables"""

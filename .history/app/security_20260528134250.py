@@ -1,27 +1,5 @@
-"""Security utilities for authentication and password hashing"""
-
 from datetime import datetime, timedelta
 from typing import Optional
-
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-import logging
-
-from app.config import get_settings
-
-logger = logging.getLogger(__name__)
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Security scheme
-security = HTTPBearer()
-
-
 class SecurityUtils:
     """Security utilities"""
 
@@ -34,11 +12,7 @@ class SecurityUtils:
         return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
-    def create_access_token(
-        data: dict,
-        expires_delta: Optional[timedelta] = None
-    ) -> str:
-
+    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         settings = get_settings()
         to_encode = data.copy()
 
@@ -61,7 +35,6 @@ class SecurityUtils:
 
     @staticmethod
     def verify_token(token: str) -> dict:
-
         settings = get_settings()
 
         try:
@@ -74,7 +47,6 @@ class SecurityUtils:
             return payload
 
         except JWTError as e:
-
             logger.error(f"Token verification failed: {e}")
 
             raise HTTPException(
@@ -90,7 +62,6 @@ async def get_current_user(
     """Get current user from token"""
 
     token = credentials.credentials
-
     payload = SecurityUtils.verify_token(token)
 
     email: str = payload.get("sub")

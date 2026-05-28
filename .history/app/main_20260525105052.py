@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from app.config import get_settings
 from app.database import db_manager, Base
 from app.routes import auth, groups, expenses, settlements, analytics
+from app.config import get_settings
 
 # Configure logging
 logging.basicConfig(
