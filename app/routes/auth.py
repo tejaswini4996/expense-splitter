@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import logging
+import traceback
 
 from app.schemas import UserCreate, UserLogin, UserResponse, Token
 from app.models import User
@@ -15,18 +16,18 @@ router = APIRouter()
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
-    # Check if user already exists
-    existing_user = db.query(User).filter(
-        (User.email == user_data.email) | (User.username == user_data.username)
-    ).first()
-    
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email or username already exists"
-        )
-    
     try:
+        # Check if user already exists
+        existing_user = db.query(User).filter(
+            (User.email == user_data.email) | (User.username == user_data.username)
+        ).first()
+        
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this email or username already exists"
+            )
+        
         # Create new user
         new_user = User(
             email=user_data.email,
@@ -39,12 +40,15 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
         db.refresh(new_user)
         logger.info(f"New user registered: {new_user.email}")
         return new_user
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        logger.error(f"Registration failed: {e}")
+        logger.error(f"Registration failed: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to register user"
+            detail=f"Failed to register user: {str(e)}"
         )
 
 @router.post("/login", response_model=Token)
@@ -72,6 +76,7 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
             expires_delta=timedelta(days=7)
         )
         logger.info(f"User logged in: {user.email}")
+        logger.info(f"Generated token: {access_token[:20]}...")
         
         return {
             "access_token": access_token,
@@ -81,10 +86,11 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Login failed: {e}")
+        logger.error(f"Login failed: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Login failed"
+            detail=f"Login failed: {str(e)}"
         )
 
 @router.get("/me", response_model=UserResponse)
