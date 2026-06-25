@@ -38,7 +38,6 @@ class User(Base):
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, username={self.username})>"
 
-class Group(Base):
     """Group Model for shared expenses"""
     __tablename__ = "groups"
     
@@ -80,7 +79,7 @@ class Expense(Base):
     expense_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     receipt_url = Column(String(255))
     notes = Column(Text)
-    is_settled = Column(Boolean, default=False, index=True)
+    is_settled = Column(Boolean, default=False,  index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
