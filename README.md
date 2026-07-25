@@ -1,1 +1,1 @@
-# expense-splitter
+# expense-splitter-API
